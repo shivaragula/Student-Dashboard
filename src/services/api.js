@@ -20,13 +20,20 @@ class ApiService {
       const url = `${this.baseURL}${endpoint}`;
       console.log('🌐 Making API request to:', url);
       
+      // Add timeout to prevent hanging requests
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      
       const response = await fetch(url, {
         headers: {
           'Content-Type': 'application/json',
           ...options.headers,
         },
+        signal: controller.signal,
         ...options,
       });
+      
+      clearTimeout(timeoutId);
 
       console.log('📡 API Response status:', response.status, 'for', endpoint);
 

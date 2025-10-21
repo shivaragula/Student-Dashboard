@@ -11,19 +11,29 @@ const ConnectionBanner = () => {
   useEffect(() => {
     const checkConnection = async () => {
       try {
+        // Add timeout to prevent hanging
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+        
         await apiService.healthCheck();
+        clearTimeout(timeoutId);
         setIsConnected(true);
         setShowBanner(false);
       } catch (error) {
+        console.log('Connection check failed:', error.message);
         setIsConnected(false);
         setShowBanner(true);
       }
     };
 
-    checkConnection();
+    // Delay initial check to let page load first
+    const initialTimeout = setTimeout(checkConnection, 2000);
     const interval = setInterval(checkConnection, 30000); // Check every 30 seconds
 
-    return () => clearInterval(interval);
+    return () => {
+      clearTimeout(initialTimeout);
+      clearInterval(interval);
+    };
   }, []);
 
   if (!showBanner || dismissed || isConnected) {
