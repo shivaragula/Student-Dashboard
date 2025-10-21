@@ -5,6 +5,10 @@ services:
     plan: free
     buildCommand: npm ci && npm run build
     startCommand: npm run server
+    buildFilter:
+      paths:
+      - package.json
+      - package-lock.json
     envVars:
       - key: NODE_ENV
         value: production
