@@ -1,5 +1,15 @@
 // API Service for backend integration
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8001';
+const getApiBaseUrl = () => {
+  // In production, use the same domain as the frontend
+  if (import.meta.env.PROD) {
+    return window.location.origin;
+  }
+  
+  // In development, use the environment variable or localhost
+  return import.meta.env.VITE_API_BASE_URL || 'http://localhost:8001';
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 console.log('🔧 API Service initialized with base URL:', API_BASE_URL);
 console.log('🔧 Environment variables:', {
@@ -136,7 +146,17 @@ class ApiService {
 
   // Health check
   async healthCheck() {
-    return this.fetchData('/api/health');
+    try {
+      return await this.fetchData('/api/health');
+    } catch (error) {
+      // If API is not available, return a mock response to prevent blocking
+      console.log('🔄 API not available, using fallback mode');
+      return {
+        status: 'fallback',
+        message: 'Using cached/sample data',
+        timestamp: new Date().toISOString()
+      };
+    }
   }
 }
 
